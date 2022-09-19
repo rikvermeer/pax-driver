@@ -1,16 +1,17 @@
-
+MODULE=ttyPos
 KERNEL_VER:=$(shell uname -r)
 KERNEL_DIR:=/lib/modules/$(KERNEL_VER)/build
 INSTALL_DIR:=/lib/modules/$(KERNEL_VER)/ttyPos
 
-obj-m := ttyPos.o
+KBUILD_CFLAGS1:=$(call cc-option,-Wno-error=implicit-function-declaration,)
+KBUILD_CFLAGS2:=$(call cc-option,-Wno-error=incompatible-pointer-types,)
+KBUILD_CFLAGS+=$(KBUILD_CFLAGS1)
+KBUILD_CFLAGS+=$(KBUILD_CFLAGS2)
+obj-m := $(MODULE).o
 
 
-all: 
-	$(MAKE) modules -C $(KERNEL_DIR) M=$(shell pwd)
-
-all-inc-kernel:
-	$(MAKE) modules -C $(KERNEL_DIR) SUBDIRS=$(shell pwd)
+all:
+	$(MAKE) -C $(KERNEL_DIR) M=$(shell pwd) SUBDIRS=$(shell pwd) modules
 
 clean:
 	$(RM) *.o *.ko *.mod.* .*.cmd *~
@@ -23,4 +24,3 @@ uninstall:
 	modprobe -r ttyPos ; echo -n
 	$(RM) $(INSTALL_DIR)/ttyPos.ko
 	/sbin/depmod -a
-

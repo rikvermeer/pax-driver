@@ -135,7 +135,7 @@ static int SendAndWaitUrb(struct tty_pos *dev,unsigned char isOut,
             else tlen=length-actlen;
         }
         else tlen = MAX_TRANSFER_SIZE;
-        
+
     	atomic_set(&pdx->urb_done, 0);
     	usb_fill_bulk_urb(pdx->urb, pdx->udev,pipe,buffer+actlen, tlen, UrbCallBack, pdx);
 
@@ -158,7 +158,7 @@ static int SendAndWaitUrb(struct tty_pos *dev,unsigned char isOut,
                 goto exit;
     		}
     	}
-    	else if (retval < 0) 
+    	else if (retval < 0)
         {
     		ERR("%s - WAIT FAILED: %d", __func__, retval);
     		retval = 3;
@@ -173,16 +173,16 @@ static int SendAndWaitUrb(struct tty_pos *dev,unsigned char isOut,
             goto exit;
         }
     }
-    
+
  exit:
-	if (pdx->urb->status) 
+	if (pdx->urb->status)
     {
 		/* if (pdx->urb->status != -EREMOTEIO) */
 		{
 			ERR("%s - error status: %d,done:%d length:%d,pipe:0x%X", __func__,
 			    pdx->urb->status,atomic_read(&pdx->urb_done),length,pipe);
             ERR("urb transfer_buffer_length:%d,actual_length:%d\n",pdx->urb->transfer_buffer_length,
-                pdx->urb->actual_length);    
+                pdx->urb->actual_length);
 		}
 	}
 	return retval;
@@ -265,7 +265,7 @@ static int ProcessCommand(struct tty_pos *dev)
     }
     else
     {
-    	if (VerifyChecksum((ST_BULK_IO *)pdx->BioPack)) 
+    	if (VerifyChecksum((ST_BULK_IO *)pdx->BioPack))
         {
     		unsigned int i;
     		/* unsigned char x; */
@@ -328,7 +328,7 @@ static int ThreadProcessing(void *data)
 	{
 		do_exit(0);
 	}
-	
+
 	tty = pdx->tty;
 	if(tty==NULL)
 	{
@@ -375,13 +375,13 @@ static int ThreadProcessing(void *data)
             retval=430;
             goto loop_g_tail;
         }
-		if (pdx->BioPack->SeqNo != pdx->SeqCount) 
+		if (pdx->BioPack->SeqNo != pdx->SeqCount)
         {
 			retval = 431;
 			goto loop_g_tail;
 		}
 
-		if (pdx->BioPack->ReqType != MAXDATA_COMMAND) 
+		if (pdx->BioPack->ReqType != MAXDATA_COMMAND)
         {
 			retval = 432;
 			goto loop_g_tail;
@@ -403,7 +403,7 @@ static int ThreadProcessing(void *data)
 			break;
 		ERR("GET_DATA_INFO RETRY, loop: %d, err: %d, seq: %02X\n",
 		    loops, retval, pdx->SeqCount);
-		ResetPipePort(pdx);        
+		ResetPipePort(pdx);
     }
     if(retval)goto exit;
 
@@ -542,7 +542,7 @@ static int ThreadProcessing(void *data)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
             tty_insert_flip_string(&pos_port[pdx->devIndex], pdx->BioPack->Data, rlen);
 			tty_flip_buffer_push(&pos_port[pdx->devIndex]);
-#else            
+#else
 			tty_insert_flip_string(tty, pdx->BioPack->Data, rlen);
 			tty_flip_buffer_push(tty);
 #endif
@@ -574,7 +574,7 @@ static int ThreadProcessing(void *data)
 			tty_wakeup(tty);
 			continue;
 		}
-	
+
 		if (wlen > (pdx->maxdata-1)) {
 			wlen = pdx->maxdata-1;
 		}
@@ -741,10 +741,10 @@ static int pos_open(struct tty_struct *tty, struct file *filp)
 	unsigned long flags;
 
     INFO("%s,tty:%p,filp:%p\n",__func__,tty,filp);
-    
+
     if(tty==NULL)return -EINVAL;
     if(tty->index >= POS_TTY_MINORS || tty->index<0)return -ECHRNG;
-    
+
 	pdx = pdx_table[tty->index];
 	if (pdx == NULL)
 		return -ENODEV;
@@ -760,7 +760,7 @@ static int pos_open(struct tty_struct *tty, struct file *filp)
 		return 0;
 	}
 	local_irq_restore(flags);
-	
+
     atomic_set(&pdx->rc_busy,1);
 
 	tty->driver_data = pdx;
@@ -819,7 +819,7 @@ static void pos_close(struct tty_struct *tty, struct file *filp)
     INFO("%s\n",__func__);
 
 	if(tty==NULL)return;
-	
+
 	pdx = tty->driver_data;
 	if (pdx == NULL)return;
     if(pdx_table[pdx->devIndex]==NULL)
@@ -844,7 +844,7 @@ static void pos_close(struct tty_struct *tty, struct file *filp)
 		if(pdx->TxPool.ReadPos==pdx->TxPool.WritePos)break;
 		msleep(50);
 	}
-	
+
 	local_irq_save(flags);
     if(THREAD_IS_RUNNING(pdx->ThreadState))
     {
@@ -866,7 +866,7 @@ static void pos_close(struct tty_struct *tty, struct file *filp)
 			msleep(1);
 		}
     }
-    	
+
     atomic_set(&pdx->rc_busy,0);
 }
 
@@ -939,7 +939,7 @@ static int pos_ioctl(struct tty_struct *tty, struct file *filp,
 #else
 static int pos_ioctl(struct tty_struct *tty, unsigned int cmd,
     unsigned long arg)
-#endif    
+#endif
 {
 	struct tty_pos *pdx = tty->driver_data;
 
@@ -979,7 +979,7 @@ static void pos_set_termios(struct tty_struct *tty,
 		if ((cflag == old_termios->c_cflag) &&
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
             (RELEVANT_IFLAG(tty->termios.c_iflag) ==
-#else            
+#else
 		    (RELEVANT_IFLAG(tty->termios->c_iflag) ==
 #endif
 		    RELEVANT_IFLAG(old_termios->c_iflag))) {
@@ -1102,7 +1102,7 @@ static int pos_chars_in_buffer(struct tty_struct *tty)
 	pdx = tty->driver_data;
 	if (!pdx)return 0;
 	if (atomic_read(&pdx->discon))return 0;
-	
+
 	local_irq_save(flags);
 	in_buf_len = GET_USING_POOL(pdx->TxPool);
 	local_irq_restore(flags);
@@ -1149,9 +1149,9 @@ static int pos_tiocmget(struct tty_struct *tty)
 static int pos_tiocmset(struct tty_struct *tty, struct file *filp,
     unsigned int set, unsigned int clear)
 #else
-static int pos_tiocmset(struct tty_struct *tty, unsigned int set, 
+static int pos_tiocmset(struct tty_struct *tty, unsigned int set,
     unsigned int clear)
-#endif    
+#endif
 {
 	struct tty_pos *pdx = tty->driver_data;
 	unsigned int mcr;
@@ -1296,7 +1296,7 @@ static int pos_usb_probe(struct usb_interface *interface,
             goto error;
         }
     }
-    
+
 	usb_set_intfdata(interface, pdx);
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
     tty_port_register_device(&pos_port[pdx->devIndex], pos_tty_driver,
@@ -1345,7 +1345,7 @@ static void pos_usb_disconnect(struct usb_interface *interface)
     {
 		local_irq_restore(flags);
     }
-    	
+
 	tty_unregister_device(pos_tty_driver, pdx->devIndex);
 	#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	tty_port_destroy(&pos_port[pdx->devIndex]);
@@ -1355,7 +1355,7 @@ static void pos_usb_disconnect(struct usb_interface *interface)
 	pdx->interface = NULL;
 
 	kref_put(&pdx->kref, pos_delete);
-    
+
     INFO("%s exit\n",__func__);
 }
 
@@ -1366,7 +1366,7 @@ static int pos_usb_suspend(struct usb_interface *interface, pm_message_t message
 	INFO("%s \n",__func__);
 	pdx = usb_get_intfdata(interface);
 	if (pdx == NULL)return 0;
-    
+
     if(THREAD_IS_RUNNING(pdx->ThreadState))return -EBUSY;
 
 	return 0;
@@ -1375,7 +1375,7 @@ static int pos_usb_suspend(struct usb_interface *interface, pm_message_t message
 static int pos_usb_resume(struct usb_interface *interface)
 {
 	INFO("%s \n",__func__);
-	
+
 	return 0;
 }
 
@@ -1420,7 +1420,7 @@ static struct usb_driver pos_usb_driver = {
 };
 
 /* Compatible with TTY_DRIVER_DYNAMIC_DEV and TTY_DRIVER_NO_DEVFS */
-#define TTY_USB_DEV     0x0008 
+#define TTY_USB_DEV     0x0008
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 
@@ -1460,7 +1460,8 @@ static int __init pos_tty_init(void)
     for(i=0;i<POS_TTY_MINORS;i++)
 		pdx_table[i] = NULL;
 
-	pos_tty_driver = alloc_tty_driver(POS_TTY_MINORS);
+	//pos_tty_driver = alloc_tty_driver(POS_TTY_MINORS);
+	pos_tty_driver = tty_alloc_driver(POS_TTY_MINORS, 0);
 	if (!pos_tty_driver)
 		return -ENOMEM;
 
@@ -1482,7 +1483,7 @@ static int __init pos_tty_init(void)
 #endif
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
-	for (i = 0; i < POS_TTY_MINORS; i++) 
+	for (i = 0; i < POS_TTY_MINORS; i++)
     {
 		tty_port_init(&pos_port[i]);
 		pos_port[i].ops = &pos_port_ops;
@@ -1508,25 +1509,27 @@ static int __init pos_tty_init(void)
         goto byebye2;
 	}
 
-    
+
 	return 0;
 byebye2:
 	tty_unregister_driver(pos_tty_driver);
 byebye1:
-    put_tty_driver(pos_tty_driver);
+    //put_tty_driver(pos_tty_driver);
+    tty_driver_kref_put(pos_tty_driver);
 
 	return result;
 }
 
 static void __exit pos_tty_exit(void)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
     int i;
 #endif
 
 	usb_deregister(&pos_usb_driver);
 	tty_unregister_driver(pos_tty_driver);
-    put_tty_driver(pos_tty_driver);
+    //put_tty_driver(pos_tty_driver);
+    tty_driver_kref_put(pos_tty_driver);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
     for (i = 0; i < POS_TTY_MINORS; i++)
@@ -1542,3 +1545,5 @@ module_exit(pos_tty_exit);
 MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_VERSION);
 MODULE_ALIAS_LDISC(N_SLIP);
+
+
